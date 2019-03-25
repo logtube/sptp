@@ -9,6 +9,7 @@ import (
 )
 
 var (
+	// ErrPayloadTooLarge payload is too large
 	ErrPayloadTooLarge = errors.New("payload too large, more than 255 chunks are needed")
 )
 
@@ -19,11 +20,15 @@ type WriterOptions struct {
 
 	// ChunkThreshold chunk size threshold, any payload larger than this will be sent with chunked message
 	ChunkThreshold int
+
+	// RNG random number generator, default to crypto/rand
+	RNG io.Reader
 }
 
 type chunkedWriter struct {
 	w io.Writer
 	t int
+	r io.Reader
 }
 
 func (w *chunkedWriter) Write(mode byte, p []byte) (err error) {
@@ -46,7 +51,7 @@ func (w *chunkedWriter) Write(mode byte, p []byte) (err error) {
 		h := [OverheadMaxSize]byte{Magic, mode}
 		h[OverheadMaxSize-2] = byte(c)
 		// message id
-		if _, err = rand.Read(h[2 : OverheadMaxSize-2]); err != nil {
+		if _, err = w.r.Read(h[2 : OverheadMaxSize-2]); err != nil {
 			return
 		}
 		// iterate and write
@@ -119,10 +124,12 @@ func (w *writer) Write(p []byte) (n int, err error) {
 	return
 }
 
+// NewWriter create a new SPTP writer with default options
 func NewWriter(w io.Writer) io.Writer {
 	return NewWriterWithOptions(w, WriterOptions{})
 }
 
+// NewWriterWithOptions create a new SPTP writer with options
 func NewWriterWithOptions(w io.Writer, opts WriterOptions) io.Writer {
 	if opts.ChunkThreshold <= 0 {
 		opts.ChunkThreshold = ChunkPayloadSizeDefault
@@ -130,9 +137,16 @@ func NewWriterWithOptions(w io.Writer, opts WriterOptions) io.Writer {
 	if opts.GzipLevel < gzip.HuffmanOnly || opts.GzipLevel > gzip.BestCompression {
 		opts.GzipLevel = gzip.NoCompression
 	}
+	if opts.RNG == nil {
+		opts.RNG = rand.Reader
+	}
 	o := &writer{
-		cw: &chunkedWriter{w: w, t: opts.ChunkThreshold},
-		l:  opts.GzipLevel,
+		cw: &chunkedWriter{
+			w: w,
+			t: opts.ChunkThreshold,
+			r: opts.RNG,
+		},
+		l: opts.GzipLevel,
 	}
 	return o
 }
