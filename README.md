@@ -1,10 +1,12 @@
 # SPTP
 
+[![Build Status](https://travis-ci.org/yankeguo/sptp.svg?branch=master)](https://travis-ci.org/yankeguo/sptp)
+
 Simple Payload Transmission Protocol
 
 We assume protocol is handled via internal networking, thus UDP can be considered as a reliable transport.
 
-The only problem is UDP packet size limitation, we solve this by unique message id and chunk count/index
+The only problem is UDP packet size limitation, we solve this by chunk reassembling with unique message id.
 
 ## Packet Format
 
