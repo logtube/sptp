@@ -7,33 +7,14 @@ import (
 	"testing"
 )
 
-type recordedWriter struct {
-	data [][]byte
-}
-
-func (w *recordedWriter) Write(p []byte) (int, error) {
-	if w.data == nil {
-		w.data = [][]byte{}
-	}
-	d := make([]byte, len(p), len(p))
-	copy(d, p)
-	w.data = append(w.data, d)
-	return len(p), nil
-}
-
-var (
-	sample          = []byte{0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09}
-	sampleThreshold = 4
-)
-
 func TestWriter_WritePlain(t *testing.T) {
 	var err error
 
-	w := &recordedWriter{}
+	w := &RecordedRW{}
 	pw := NewWriterWithOptions(w, WriterOptions{ChunkThreshold: sampleThreshold})
 
 	var n int
-	if n, err = pw.Write(sample); err != nil {
+	if n, err = pw.Write(sampleLG); err != nil {
 		t.Fatal(err)
 	}
 	if n != 9 {
@@ -78,11 +59,11 @@ func TestWriter_WritePlain(t *testing.T) {
 func TestWriter_WriteCompression(t *testing.T) {
 	var err error
 
-	w := &recordedWriter{}
+	w := &RecordedRW{}
 	pw := NewWriterWithOptions(w, WriterOptions{ChunkThreshold: sampleThreshold, GzipLevel: gzip.BestCompression})
 
 	var n int
-	if n, err = pw.Write(sample); err != nil {
+	if n, err = pw.Write(sampleLG); err != nil {
 		t.Fatal(err)
 	}
 	if n != 9 {
@@ -107,7 +88,7 @@ func TestWriter_WriteCompression(t *testing.T) {
 	if res, err = ioutil.ReadAll(gr); err != nil {
 		t.Fatal(err)
 	}
-	if !bytes.Equal(res, sample) {
+	if !bytes.Equal(res, sampleLG) {
 		t.Logf("% 02x", res)
 		t.Fatal("failed to resume")
 	}

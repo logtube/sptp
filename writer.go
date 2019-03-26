@@ -48,10 +48,10 @@ func (w *chunkedWriter) Write(mode byte, p []byte) (err error) {
 		// set mode chunked
 		mode |= ModeChunked
 		// header
-		h := [OverheadMaxSize]byte{Magic, mode}
-		h[OverheadMaxSize-2] = byte(c)
+		h := [OverheadChunked]byte{Magic, mode}
+		h[OverheadChunked-2] = byte(c)
 		// message id
-		if _, err = w.r.Read(h[2 : OverheadMaxSize-2]); err != nil {
+		if _, err = w.r.Read(h[2 : OverheadChunked-2]); err != nil {
 			return
 		}
 		// iterate and write

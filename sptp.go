@@ -1,11 +1,16 @@
 package sptp
 
+import "time"
+
 const (
 	// Magic magic number for SPTP
 	Magic byte = 0xFA
 
-	// OverheadMaxSize maximum header size, i.e. chunked message
-	OverheadMaxSize = 12
+	// OverheadChunked maximum header size, i.e. chunked message
+	OverheadChunked = 12
+
+	// OverheadSimple minimum header size, i.e. simple message
+	OverheadSimple = 2
 
 	// ChunkedMaxCount maximum chunk count
 	ChunkedMaxCount = 255
@@ -20,5 +25,8 @@ const (
 	ChunkBufferSizeDefault = 8192
 
 	// ChunkPayloadSizeDefault default frame size, i.e. maximum SPTP payload size
-	ChunkPayloadSizeDefault = ChunkBufferSizeDefault - OverheadMaxSize
+	ChunkPayloadSizeDefault = ChunkBufferSizeDefault - OverheadChunked
+
+	// ChunkTimeoutDefault
+	ChunkTimeoutDefault = time.Second * 3
 )
