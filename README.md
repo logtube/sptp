@@ -1,6 +1,6 @@
 # SPTP
 
-[![Build Status](https://travis-ci.org/yankeguo/sptp.svg?branch=master)](https://travis-ci.org/yankeguo/sptp)
+[![Build Status](https://travis-ci.org/logtube/sptp.svg?branch=master)](https://travis-ci.org/logtube/sptp)
 
 Simple Payload Transmission Protocol
 
